@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using ProductAPI.Data;
+using ProductAPI.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,22 +12,22 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Host.ConfigureServices(services => services.AddScoped<ProductDbContext>());
 
-IServiceCollection serviceCollection = builder.Services.AddDbContext<ProductDbContext>(
-    option => option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ProductDbContext>();
+builder.Services.AddTransient<IProductRepository, ProductRepository>();
 
-var app = builder.Build();
-var dbService = app.Services.GetService<ProductDbContext>();
+
+    var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    dbService.Database.EnsureCreated();
 }
 
-dbService.Seed();
+SeedData.Seed(app);
 
 app.UseHttpsRedirection();
 

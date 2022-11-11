@@ -2,8 +2,10 @@
 {
     public static class SeedData
     {
-        public static void Seed(this ProductDbContext context)
+        public static void Seed(WebApplication app)
         {
+            var scope = app.Services.CreateScope();
+            ProductDbContext context = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
             if (!context.Products.Any())
             {
                 var products =
